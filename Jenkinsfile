@@ -47,7 +47,7 @@ pipeline {
                     sh 'git config user.name "Jenkins CI"'
             
                     sh 'git add app/package.json'
-                    sh "git commit -m 'chore: bump version to ${env.APP_VERSION}'"
+                    sh "git commit -m 'chore: bump version to ${env.APP_VERSION} [skip ci]'"
 
                     sh "git push https://${GIT_USER}:${GIT_TOKEN}@github.com/${GIT_USER}/jenkins-project.git HEAD:main"
                 }
