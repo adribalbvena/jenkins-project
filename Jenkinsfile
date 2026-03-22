@@ -8,10 +8,6 @@ pipeline {
     }
 
     environment {
-        DOCKER_REPO = 'adribalbvena/node-app'
-        GITHUB_REPO = 'jenkins-project'
-        DOCKER_HUB_CREDS = 'docker-hub-creds'
-        GITHUB_CREDS = 'github-creds'
         VERSION = ''
     }
 
@@ -19,7 +15,7 @@ pipeline {
         stage('Test & Version') {
             steps {
                 script {
-                    env.APP_VERSION = testAndIncrementVersion(directory: 'app', type: 'patch')
+                    env.APP_VERSION = testAndIncrementNpmVersion(directory: 'app', type: 'patch')
                 }
                 echo "Version: ${env.APP_VERSION}"
             }
@@ -29,9 +25,8 @@ pipeline {
         stage('Build & Push Image') {
             steps {
                 buildAndPushDocker(
-                    repo: env.DOCKER_REPO,
+                    repo: 'adribalbvena/node-app',
                     tag: env.APP_VERSION,
-                    credsId: env.DOCKER_HUB_CREDS
                 )
             }
         }
@@ -39,8 +34,7 @@ pipeline {
         stage('Git Commit & Push') {
             steps {
                 pushToGithub(
-                    credsId: env.GITHUB_CREDS,
-                    repoName: env.GITHUB_REPO,
+                    repoName: 'jenkins-project',
                     file: 'app/package.json',
                     message: "chore: Bump version to ${env.APP_VERSION}"
                 )
