@@ -1,0 +1,7 @@
+version: '3.8'
+services:
+  node-app:
+    image: adribalbvena/node-app:${APP_VERSION}
+    ports:
+      - "8080:3000"
+    restart: always
