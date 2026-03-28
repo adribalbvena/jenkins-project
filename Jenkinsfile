@@ -31,6 +31,26 @@ pipeline {
             }
         }
 
+        stage('Deploy to EC2') {
+            steps {
+                script {
+                    def remoteIp = "3.77.193.229" 
+                    
+                    sshagent(['aws-ec2-key']) {
+                        sh "scp -o StrictHostKeyChecking=no docker-compose.yaml ec2-user@${remoteIp}:/home/ec2-user/docker-compose.yaml"
+
+                        sh """
+                            ssh -o StrictHostKeyChecking=no ec2-user@${remoteIp} "
+                                export APP_VERSION=${env.APP_VERSION}                                
+                                /usr/local/bin/docker-compose up -d
+                                docker image prune -f
+                            "
+                        """
+                    }
+                }
+            }
+        }
+
         stage('Git Commit & Push') {
             steps {
                 pushToGithub(
