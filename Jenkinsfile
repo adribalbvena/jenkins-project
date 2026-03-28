@@ -7,22 +7,32 @@ pipeline {
         nodejs 'node20' 
     }
 
-    environment {
-        VERSION = ''
-    }
-
     stages {
-        stage('Test & Version') {
+        stage('Test') {
+            steps {
+                testNpm(directory: 'app')
+            }
+        }
+
+        stage('Version Bump') {
+            when {
+                branch 'main'
+            }
             steps {
                 script {
-                    env.APP_VERSION = testAndIncrementNpmVersion(directory: 'app', type: 'patch')
+                    env.APP_VERSION = versionNpmBump(
+                        directory: 'app',
+                        type: 'patch'
+                    )
                 }
                 echo "Version: ${env.APP_VERSION}"
             }
         }
-        
 
         stage('Build & Push Image') {
+            when {
+                branch 'main'
+            }
             steps {
                 buildAndPushDocker(
                     repo: 'adribalbvena/node-app',
@@ -32,6 +42,9 @@ pipeline {
         }
 
         stage('Deploy to EC2') {
+            when {
+                branch 'main'
+            }
             steps {
                 script {
                     def remoteIp = "3.77.193.229" 
@@ -52,6 +65,9 @@ pipeline {
         }
 
         stage('Git Commit & Push') {
+            when {
+                branch 'main'
+            }
             steps {
                 pushToGithub(
                     repoName: 'jenkins-project',
