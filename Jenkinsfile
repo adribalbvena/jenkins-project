@@ -8,6 +8,22 @@ pipeline {
     }
 
     stages {
+        stage('Skip bot commits') {
+            steps {
+                script {
+                    def author = sh(
+                        script: "git log -1 --pretty=%an",
+                        returnStdout: true
+                    ).trim()
+
+                    if (author == "Jenkins CI") {
+                        currentBuild.result = 'NOT_BUILT'
+                        error("Skipping build (commit from Jenkins)")
+                    }
+                }
+            }
+        }
+
         stage('Test') {
             steps {
                 testNpm(directory: 'app')
